@@ -35,7 +35,7 @@ import seaborn as sns
 # 2. ĐỌC DỮ LIỆU
 # ==============================================================================
 
-file_path = "diabetic_data.csv"
+file_path = "data/raw/diabetic_data.csv"
 
 df = pd.read_csv(file_path)
 
@@ -336,9 +336,7 @@ print(
 # 13. XUẤT FILE DỮ LIỆU SẠCH
 # ==============================================================================
 
-output_filename = (
-    "diabetes_cleaned_data.csv"
-)
+output_filename = "data/processed/diabetic_cleaned_data.csv"
 
 df.to_csv(
     output_filename,
