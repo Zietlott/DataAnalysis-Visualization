@@ -35,7 +35,7 @@ import seaborn as sns
 # 2. ĐỌC DỮ LIỆU
 # ==============================================================================
 
-file_path = "data/raw/diabetic_data.csv"
+file_path = "diabetic_data.csv"
 
 df = pd.read_csv(file_path)
 
@@ -149,11 +149,13 @@ df = df[
 # 8. LOẠI CÁC CỘT KHÔNG CẦN THIẾT
 # ==============================================================================
 
+# Lưu lại patient_nbr trước khi loại các cột không cần thiết
+patient_nbr_backup = df['patient_nbr'].copy()
+
 cols_to_drop = [
 
     # ID
     'encounter_id',
-    'patient_nbr',
 
     # Missing nhiều
     'weight',
@@ -181,6 +183,8 @@ df = df.drop(
     ]
 )
 
+# Khôi phục lại patient_nbr sau khi loại các cột không cần thiết
+df['patient_nbr'] = patient_nbr_backup.loc[df.index]
 
 # ==============================================================================
 # 9. XỬ LÝ MISSING VALUES CÒN LẠI
@@ -332,7 +336,9 @@ print(
 # 13. XUẤT FILE DỮ LIỆU SẠCH
 # ==============================================================================
 
-output_filename = "data/processed/diabetes_cleaned_data.csv"
+output_filename = (
+    "diabetes_cleaned_data.csv"
+)
 
 df.to_csv(
     output_filename,
