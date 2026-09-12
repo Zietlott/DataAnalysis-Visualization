@@ -37,7 +37,7 @@ from sklearn.metrics import (
 # 2. ĐỌC DỮ LIỆU
 # ============================================================
 
-file_path = "data/processed/diabetes_cleaned_data.csv"
+file_path = "data/processed/diabetic_cleaned_data.csv"
 df = pd.read_csv(file_path)
 print("=" * 60)
 print("THÔNG TIN DỮ LIỆU")
