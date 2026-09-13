@@ -236,8 +236,11 @@ y_prob_lr = logistic_model.predict_proba(X_test)[:, 1]
 # Random Forest
 # -----------------------------
 
-y_pred_rf = random_forest_model.predict(X_test)
 y_prob_rf = random_forest_model.predict_proba(X_test)[:, 1]
+
+# Giảm threshold để tăng khả năng phát hiện bệnh nhân có nguy cơ
+threshold = 0.3
+y_pred_rf = (y_prob_rf >= threshold).astype(int)
 
 # ============================================================
 # 11. HÀM ĐÁNH GIÁ MODEL
