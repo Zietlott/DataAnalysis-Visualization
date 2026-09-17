@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import GroupShuffleSplit, GridSearchCV
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -192,15 +192,37 @@ preprocessor = ColumnTransformer(
 logistic_model = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
-        ("model", LogisticRegression(max_iter=3000, class_weight="balanced"))
+        ("model", LogisticRegression(
+            max_iter=3000,
+            class_weight="balanced"
+        ))
     ]
 )
 
+# Các giá trị C sẽ được Grid Search thử nghiệm
+param_grid_lr = {
+    "model__C": [0.01, 0.1, 1, 10]
+}
+
 print("\n" + "=" * 60)
-print("TRAIN LOGISTIC REGRESSION")
+print("GRID SEARCH - LOGISTIC REGRESSION")
 print("=" * 60)
 
-logistic_model.fit(X_train, y_train)
+grid_lr = GridSearchCV(
+    estimator=logistic_model,
+    param_grid=param_grid_lr,
+    cv=5,
+    scoring="f1",
+    n_jobs=-1
+)
+
+grid_lr.fit(X_train, y_train)
+
+# Lấy model có kết quả tốt nhất
+logistic_model = grid_lr.best_estimator_
+
+print("Best parameters:", grid_lr.best_params_)
+print("Best CV F1-score:", grid_lr.best_score_)
 print("Logistic Regression training hoàn tất.")
 
 
@@ -212,14 +234,40 @@ print("Logistic Regression training hoàn tất.")
 random_forest_model = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
-        ("model", RandomForestClassifier(n_estimators=200, random_state=42, class_weight="balanced", n_jobs=-1))
+        ("model", RandomForestClassifier(
+            random_state=42,
+            class_weight="balanced",
+            n_jobs=-1
+        ))
     ]
 )
 
+# Các hyperparameter sẽ được Grid Search thử nghiệm
+param_grid_rf = {
+    "model__n_estimators": [200],
+    "model__max_depth": [10, 20],
+    "model__min_samples_split": [2, 5]
+}
+
 print("\n" + "=" * 60)
-print("TRAIN RANDOM FOREST")
+print("GRID SEARCH - RANDOM FOREST")
 print("=" * 60)
-random_forest_model.fit(X_train, y_train)
+
+grid_rf = GridSearchCV(
+    estimator=random_forest_model,
+    param_grid=param_grid_rf,
+    cv=5,
+    scoring="f1",
+    n_jobs=-1
+)
+
+grid_rf.fit(X_train, y_train)
+
+# Lấy model có kết quả tốt nhất
+random_forest_model = grid_rf.best_estimator_
+
+print("Best parameters:", grid_rf.best_params_)
+print("Best CV F1-score:", grid_rf.best_score_)
 print("Random Forest training hoàn tất.")
 
 # ============================================================
@@ -235,12 +283,8 @@ y_prob_lr = logistic_model.predict_proba(X_test)[:, 1]
 # -----------------------------
 # Random Forest
 # -----------------------------
-
+y_pred_rf = random_forest_model.predict(X_test)
 y_prob_rf = random_forest_model.predict_proba(X_test)[:, 1]
-
-# Giảm threshold để tăng khả năng phát hiện bệnh nhân có nguy cơ
-threshold = 0.3
-y_pred_rf = (y_prob_rf >= threshold).astype(int)
 
 # ============================================================
 # 11. HÀM ĐÁNH GIÁ MODEL
@@ -328,6 +372,7 @@ plt.ylabel("Score")
 plt.xticks(rotation=0)
 plt.legend(title="Metrics")
 plt.tight_layout()
+plt.savefig("figures/model_comparison.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 # ============================================================
@@ -342,6 +387,7 @@ plt.title("Confusion Matrix - Logistic Regression")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.tight_layout()
+plt.savefig("figures/confusion_matrix_logistic_regression.png",dpi=300,bbox_inches="tight")
 plt.show()
 
 
@@ -357,6 +403,7 @@ plt.title("Confusion Matrix - Random Forest")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.tight_layout()
+plt.savefig("figures/confusion_matrix_random_forest.png",dpi=300,bbox_inches="tight")
 plt.show()
 
 # ============================================================
@@ -378,6 +425,7 @@ plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.legend()
 plt.tight_layout()
+plt.savefig("figures/roc_curve.png",dpi=300,bbox_inches="tight")
 plt.show()
 
 
@@ -423,26 +471,5 @@ plt.title("Top 20 Feature Importance - Random Forest")
 plt.xlabel("Importance")
 plt.ylabel("Feature")
 plt.tight_layout()
+plt.savefig("figures/random_forest_feature_importance.png", dpi=300, bbox_inches="tight")
 plt.show()
-
-# ============================================================
-# 20. LƯU KẾT QUẢ
-# ============================================================
-
-results.to_csv("figures/model_comparison.csv", index=False)
-
-importance_df.to_csv("figures/random_forest_feature_importance.csv", index=False)
-
-print("\n" + "=" * 60)
-print("HOÀN TẤT")
-print("=" * 60)
-
-print("Đã hoàn thành:")
-print("1. Chia Train/Test theo bệnh nhân")
-print("2. Preprocessing")
-print("3. Logistic Regression")
-print("4. Random Forest")
-print("5. Đánh giá model")
-print("6. Confusion Matrix")
-print("7. ROC Curve")
-print("8. Feature Importance")
