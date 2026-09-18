@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Đọc dữ liệu
-df = pd.read_csv("diabetes_cleaned_data.csv")
+df = pd.read_csv("data/processed/diabetic_cleaned_data.csv")
 
 
 # 1. TIME_IN_HOSPITAL ↔ NUM_MEDICATIONS
