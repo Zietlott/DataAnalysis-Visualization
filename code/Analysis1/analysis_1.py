@@ -24,7 +24,7 @@ print(f"Đang đọc dữ liệu từ: {DATA_PATH}")
 df = pd.read_csv(DATA_PATH)
 print(f"Nạp dữ liệu thành công: {df.shape[0]:,} dòng, {df.shape[1]} cột.\n")
 
-# 2. TẠO BIẾN MỤC TIÊU VÀ KIỂM TRA
+# 2. BIẾN MỤC TIÊU VÀ KIỂM TRA
 if "target_30days" not in df.columns and "readmitted" in df.columns:
     df["target_30days"] = (df["readmitted"] == "<30").astype(int)
 
@@ -53,7 +53,7 @@ stay_mode_count = (df["time_in_hospital"] == stay_mode).sum()
 
 print("THỰC TRẠNG TÁI NHẬP VIỆN TRONG 30 NGÀY")
 print(f"Tổng số ca quan sát: {total_cases:,} ca")
-print(f"- Tái nhập viện <= 30 ngày: {readmit_cases:,} ca ({pct_readmit:.2f}%)")
+print(f"- Tái nhập viện < 30 ngày: {readmit_cases:,} ca ({pct_readmit:.2f}%)")
 print(f"- Không tái nhập viện <= 30 ngày: {non_readmit_cases:,} ca ({pct_non_readmit:.2f}%)")
 
 print("\nPHÂN BỐ THEO GIỚI TÍNH:")
@@ -222,7 +222,7 @@ if "number_inpatient" in df.columns:
 
 # 5. TỔNG KẾT INSIGHT - TV2
 print("\nTỔNG KẾT PHÂN TÍCH THỰC TRẠNG - TV2")
-print(f"- Tỷ lệ tái nhập viện chung (<= 30 ngày): {pct_readmit:.2f}%.")
+print(f"- Tỷ lệ tái nhập viện chung (< 30 ngày): {pct_readmit:.2f}%.")
 print(f"- Thời gian nằm viện: Trung bình {stay_mean:.2f} ngày; Phổ biến nhất là {stay_mode} ngày.")
 print(f"- Nhóm giới tính chiếm đa số: {largest_gender} ({largest_gender_pct:.2f}%).")
 print(f"- Độ tuổi rủi ro cao nhất: Nhóm {highest_age_group} có tỷ lệ tái nhập viện lên tới {highest_age_rate:.1f}%.")
