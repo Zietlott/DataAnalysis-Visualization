@@ -1646,7 +1646,7 @@ st.html(
 # =========================================================
 
 st.markdown(
-    "### 5. time_in_hospital ↔ num_medications"
+    "### 5. Thời gian nằm viện ↔  Số loại thuốc"
 )
 
 if (
@@ -1903,14 +1903,14 @@ for column, variable, title, figure_number in [
     (
         col5,
         "number_emergency",
-        "6. Tỷ lệ tái nhập viện theo number_emergency",
+        "6. Tỷ lệ tái nhập viện theo số lần cấp cứu trước đó",
         6
     ),
 
     (
         col6,
         "number_outpatient",
-        "7. Tỷ lệ tái nhập viện theo number_outpatient",
+        "7. Tỷ lệ tái nhập viện theo số lần khám ngoại trú trước đó",
         7
     )
 
@@ -2102,7 +2102,7 @@ for column, variable, title, figure_number in [
 # =========================================================
 
 st.markdown(
-    "### 8. age ↔ time_in_hospital"
+    "### 8. Tuổi ↔ Thời gian nằm viện"
 )
 
 if (
@@ -2291,66 +2291,6 @@ if (
             )
 
 
-# =========================================================
-# 12. TV4 - MACHINE LEARNING
-# =========================================================
-
-st.html(
-    """
-    <div class="section-title">
-        🤖 Machine Learning
-    </div>
-    """
-)
-
-st.html(
-    """
-    <div class="section-desc">
-        Kết quả Logistic Regression và Random Forest dùng để
-        dự đoán khả năng tái nhập viện trong 30 ngày.
-    </div>
-    """
-)
-
-
-# =========================================================
-# MODEL RESULTS
-# =========================================================
-
-if MODEL_RESULTS_PATH.exists():
-
-    try:
-
-        model_results = pd.read_csv(
-            MODEL_RESULTS_PATH
-        )
-
-        st.markdown(
-            "### Kết quả các mô hình"
-        )
-
-        st.dataframe(
-            model_results.style.background_gradient(
-                cmap="Blues",
-                subset=[c for c in model_results.columns if c != "Model"]
-            ),
-            use_container_width=True,
-            hide_index=True
-        )
-
-    except Exception:
-
-        st.warning(
-            "Không đọc được model_results.csv."
-        )
-
-else:
-
-    st.info(
-        "Chưa có model_results.csv. "
-        "Dashboard vẫn hiển thị các biểu đồ TV4 "
-        "được lưu trong thư mục figures."
-    )
 
 
 # =========================================================
@@ -2546,99 +2486,628 @@ if FEATURE_IMPORTANCE_PATH.exists():
 
         pass
 
-
 # =========================================================
-# 13. TỔNG KẾT
+# 14. RECOMMENDATION
 # =========================================================
 
 st.html(
     """
     <div class="section-title">
-        📝 Tổng kết
+        ✅ Recommendation
     </div>
     """
 )
 
-sum1, sum2, sum3 = st.columns(3)
-
-
-with sum1:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
-
-            <div class="badge badge-tv2">
-                TV2
-            </div>
-
-            <h4>Thực trạng</h4>
-
-            <p>
-                Mô tả tỷ lệ tái nhập viện,
-                thời gian nằm viện,
-                nhóm tuổi và tiền sử nhập viện.
-            </p>
-
-        </div>
-        """
-    )
-
-
-with sum2:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv3']};">
-
-            <div class="badge badge-tv3">
-                TV3
-            </div>
-
-            <h4>Phân tích thống kê</h4>
-
-            <p>
-                Kiểm tra mối liên hệ giữa thời gian nằm viện,
-                số thuốc, tuổi và lịch sử sử dụng dịch vụ y tế.
-            </p>
-
-        </div>
-        """
-    )
-
-
-with sum3:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv4']};">
-
-            <div class="badge badge-tv4">
-                TV4
-            </div>
-
-            <h4>Dự đoán</h4>
-
-            <p>
-                Xây dựng Logistic Regression và Random Forest,
-                đồng thời đánh giá bằng các chỉ số và biểu đồ
-                của mô hình.
-            </p>
-
-        </div>
-        """
-    )
-
-
-# =========================================================
-# FOOTER
-# =========================================================
-
 st.html(
     """
-    <div class="footer">
-        TV5 · Dashboard tổng hợp phân tích tái nhập viện
-        bệnh nhân tiểu đường
+    <div class="section-desc">
+        Các đề xuất được tổng hợp từ kết quả TV2, TV3 và các chỉ số
+        trên Dashboard. Tất cả số liệu được tính lại theo bộ lọc hiện tại.
+    </div>
+    """
+)
+
+# =========================================================
+# 14.1 TÍNH TOÁN SỐ LIỆU
+# =========================================================
+
+reco_total = len(filtered)
+
+reco_readmit = int(
+    filtered["target_30days"].sum()
+)
+
+reco_rate = (
+    filtered["target_30days"].mean() * 100
+)
+
+overall_rate = (
+    df["target_30days"].mean() * 100
+)
+
+reco_difference = reco_rate - overall_rate
+
+
+# =========================================================
+# 14.2 NHÓM TUỔI
+# Chỉ xét nhóm có ít nhất 30 trường hợp
+# =========================================================
+
+reco_age_group = "N/A"
+reco_age_rate = np.nan
+reco_age_n = 0
+
+if (
+    "age" in filtered.columns
+    and "target_30days" in filtered.columns
+):
+
+    age_order = [
+        "[0-10)",
+        "[10-20)",
+        "[20-30)",
+        "[30-40)",
+        "[40-50)",
+        "[50-60)",
+        "[60-70)",
+        "[70-80)",
+        "[80-90)",
+        "[90-100)"
+    ]
+
+    age_temp = filtered[
+        ["age", "target_30days"]
+    ].copy()
+
+    age_temp["age"] = age_temp["age"].astype(str)
+
+    age_summary = (
+        age_temp
+        .groupby("age")["target_30days"]
+        .agg(["mean", "count"])
+        .reindex(age_order)
+        .dropna()
+    )
+
+    age_summary = age_summary[
+        age_summary["count"] >= 30
+    ]
+
+    if len(age_summary) > 0:
+
+        reco_age_group = age_summary["mean"].idxmax()
+
+        reco_age_rate = (
+            age_summary.loc[
+                reco_age_group,
+                "mean"
+            ] * 100
+        )
+
+        reco_age_n = int(
+            age_summary.loc[
+                reco_age_group,
+                "count"
+            ]
+        )
+
+
+# =========================================================
+# 14.3 NUMBER INPATIENT
+# So sánh 0 lần và >=2 lần
+# =========================================================
+
+reco_inpatient_0_rate = np.nan
+reco_inpatient_2_rate = np.nan
+
+reco_inpatient_0_n = 0
+reco_inpatient_2_n = 0
+
+if (
+    "number_inpatient" in filtered.columns
+    and "target_30days" in filtered.columns
+):
+
+    inpatient_values = pd.to_numeric(
+        filtered["number_inpatient"],
+        errors="coerce"
+    )
+
+    inpatient_0 = inpatient_values == 0
+    inpatient_2plus = inpatient_values >= 2
+
+    if inpatient_0.sum() >= 30:
+
+        reco_inpatient_0_rate = (
+            filtered.loc[
+                inpatient_0,
+                "target_30days"
+            ].mean() * 100
+        )
+
+        reco_inpatient_0_n = int(
+            inpatient_0.sum()
+        )
+
+    if inpatient_2plus.sum() >= 30:
+
+        reco_inpatient_2_rate = (
+            filtered.loc[
+                inpatient_2plus,
+                "target_30days"
+            ].mean() * 100
+        )
+
+        reco_inpatient_2_n = int(
+            inpatient_2plus.sum()
+        )
+
+
+if (
+    not np.isnan(reco_inpatient_0_rate)
+    and not np.isnan(reco_inpatient_2_rate)
+):
+
+    reco_inpatient_difference = (
+        reco_inpatient_2_rate
+        - reco_inpatient_0_rate
+    )
+
+else:
+
+    reco_inpatient_difference = np.nan
+
+
+# =========================================================
+# 14.4 NUMBER EMERGENCY
+# =========================================================
+
+reco_emergency_0_rate = np.nan
+reco_emergency_2_rate = np.nan
+
+reco_emergency_0_n = 0
+reco_emergency_2_n = 0
+
+if (
+    "number_emergency" in filtered.columns
+    and "target_30days" in filtered.columns
+):
+
+    emergency_values = pd.to_numeric(
+        filtered["number_emergency"],
+        errors="coerce"
+    )
+
+    emergency_0 = emergency_values == 0
+    emergency_2plus = emergency_values >= 2
+
+    if emergency_0.sum() >= 30:
+
+        reco_emergency_0_rate = (
+            filtered.loc[
+                emergency_0,
+                "target_30days"
+            ].mean() * 100
+        )
+
+        reco_emergency_0_n = int(
+            emergency_0.sum()
+        )
+
+    if emergency_2plus.sum() >= 30:
+
+        reco_emergency_2_rate = (
+            filtered.loc[
+                emergency_2plus,
+                "target_30days"
+            ].mean() * 100
+        )
+
+        reco_emergency_2_n = int(
+            emergency_2plus.sum()
+        )
+
+
+if (
+    not np.isnan(reco_emergency_0_rate)
+    and not np.isnan(reco_emergency_2_rate)
+):
+
+    reco_emergency_difference = (
+        reco_emergency_2_rate
+        - reco_emergency_0_rate
+    )
+
+else:
+
+    reco_emergency_difference = np.nan
+
+
+# =========================================================
+# 14.5 TƯƠNG QUAN TV3
+# =========================================================
+
+reco_corr = np.nan
+
+if (
+    "time_in_hospital" in filtered.columns
+    and "num_medications" in filtered.columns
+):
+
+    corr_data = filtered[
+        [
+            "time_in_hospital",
+            "num_medications"
+        ]
+    ].apply(
+        pd.to_numeric,
+        errors="coerce"
+    ).dropna()
+
+    if len(corr_data) >= 2:
+
+        reco_corr = corr_data[
+            "time_in_hospital"
+        ].corr(
+            corr_data[
+                "num_medications"
+            ]
+        )
+
+
+# =========================================================
+# 14.6 HIỂN THỊ KPI NHANH
+# =========================================================
+
+r1, r2, r3, r4 = st.columns(4)
+
+r1.metric(
+    "Số trường hợp",
+    f"{reco_total:,}"
+)
+
+r2.metric(
+    "Tái nhập viện <30 ngày",
+    f"{reco_readmit:,}"
+)
+
+r3.metric(
+    "Tỷ lệ hiện tại",
+    f"{reco_rate:.2f}%"
+)
+
+r4.metric(
+    "So với toàn bộ dữ liệu",
+    f"{reco_difference:+.2f} điểm %"
+)
+
+
+# =========================================================
+# 14.7 ĐÁNH GIÁ TỔNG QUAN
+# =========================================================
+
+if reco_difference > 0:
+
+    st.warning(
+        f"Tỷ lệ tái nhập viện <30 ngày của nhóm đang chọn là "
+        f"**{reco_rate:.2f}%**, cao hơn mức chung "
+        f"**{overall_rate:.2f}%** khoảng "
+        f"**{reco_difference:.2f} điểm phần trăm**."
+    )
+
+elif reco_difference < 0:
+
+    st.info(
+        f"Tỷ lệ tái nhập viện <30 ngày của nhóm đang chọn là "
+        f"**{reco_rate:.2f}%**, thấp hơn mức chung "
+        f"**{overall_rate:.2f}%** khoảng "
+        f"**{abs(reco_difference):.2f} điểm phần trăm**."
+    )
+
+else:
+
+    st.info(
+        f"Tỷ lệ tái nhập viện <30 ngày của nhóm đang chọn "
+        f"tương đương mức chung **{overall_rate:.2f}%**."
+    )
+
+
+# =========================================================
+# 14.8 CÁC ĐỀ XUẤT
+# =========================================================
+
+reco1, reco2 = st.columns(2)
+
+
+# ---------------------------------------------------------
+# ĐỀ XUẤT 1 - TV2
+# ---------------------------------------------------------
+
+with reco1:
+
+    if reco_age_group != "N/A":
+
+        st.html(
+            f"""
+            <div class="info-card"
+                 style="border-top-color:{INFO_ACCENTS['tv2']};">
+
+                <div class="badge badge-tv2">
+                    Đề xuất 1 · TV2
+                </div>
+
+                <h4>
+                    Theo dõi nhóm tuổi {reco_age_group}
+                </h4>
+
+                <p>
+                    Trong dữ liệu đang chọn, nhóm tuổi
+                    <b>{reco_age_group}</b> có tỷ lệ tái nhập viện
+                    <b>{reco_age_rate:.2f}%</b>
+                    (n={reco_age_n:,}).
+                </p>
+
+                <p>
+                    Có thể tăng cường theo dõi sau xuất viện,
+                    nhắc lịch tái khám và duy trì liên hệ với
+                    nhóm này trong thời gian theo dõi 30 ngày.
+                </p>
+
+                <small>
+                    Kết quả mang tính mô tả theo dữ liệu hiện tại.
+                </small>
+
+            </div>
+            """
+        )
+
+    else:
+
+        st.info(
+            "Chưa có nhóm tuổi nào đủ 30 trường hợp để phân tích."
+        )
+
+
+# ---------------------------------------------------------
+# ĐỀ XUẤT 2 - TV3 INPATIENT
+# ---------------------------------------------------------
+
+with reco2:
+
+    if (
+        not np.isnan(reco_inpatient_0_rate)
+        and not np.isnan(reco_inpatient_2_rate)
+    ):
+
+        diff_text = (
+            f"{reco_inpatient_difference:+.2f}"
+        )
+
+        st.html(
+            f"""
+            <div class="info-card"
+                 style="border-top-color:{INFO_ACCENTS['tv3']};">
+
+                <div class="badge badge-tv3">
+                    Đề xuất 2 · TV3
+                </div>
+
+                <h4>
+                    Quan tâm tiền sử nhập viện
+                </h4>
+
+                <p>
+                    Nhóm có <b>≥2 lần nhập viện trước đó</b>
+                    có tỷ lệ tái nhập viện
+                    <b>{reco_inpatient_2_rate:.2f}%</b>
+                    (n={reco_inpatient_2_n:,}).
+                </p>
+
+                <p>
+                    Nhóm 0 lần có tỷ lệ
+                    <b>{reco_inpatient_0_rate:.2f}%</b>
+                    (n={reco_inpatient_0_n:,}).
+                    Chênh lệch là
+                    <b>{diff_text} điểm phần trăm</b>.
+                </p>
+
+                <p>
+                    Có thể sử dụng tiền sử nhập viện như một
+                    tiêu chí hỗ trợ sàng lọc và theo dõi.
+                </p>
+
+                <small>
+                    Đây là mối liên hệ thống kê, không khẳng định
+                    quan hệ nhân quả.
+                </small>
+
+            </div>
+            """
+        )
+
+    else:
+
+        st.info(
+            "Chưa đủ dữ liệu để so sánh nhóm inpatient."
+        )
+
+
+# =========================================================
+# 14.9 ĐỀ XUẤT 3 - EMERGENCY
+# =========================================================
+
+if (
+    not np.isnan(reco_emergency_0_rate)
+    and not np.isnan(reco_emergency_2_rate)
+):
+
+    emergency_diff_text = (
+        f"{reco_emergency_difference:+.2f}"
+    )
+
+    st.html(
+        f"""
+        <div class="info-card"
+             style="border-top-color:#374151; margin-top:16px;">
+
+            <div class="badge"
+                 style="background:#374151; color:#ffffff !important;">
+                Đề xuất 3 · TV3
+            </div>
+
+            <h4>
+                Theo dõi tiền sử cấp cứu
+            </h4>
+
+            <p>
+                Nhóm có <b>≥2 lần cấp cứu trước đó</b>
+                có tỷ lệ tái nhập viện
+                <b>{reco_emergency_2_rate:.2f}%</b>
+                (n={reco_emergency_2_n:,}),
+                trong khi nhóm 0 lần là
+                <b>{reco_emergency_0_rate:.2f}%</b>
+                (n={reco_emergency_0_n:,}).
+            </p>
+
+            <p>
+                Chênh lệch giữa hai nhóm là
+                <b>{emergency_diff_text} điểm phần trăm</b>.
+                Có thể kết hợp thông tin này với tiền sử
+                nhập viện để hỗ trợ theo dõi.
+            </p>
+
+            <small>
+                Kết quả phản ánh mối liên hệ trong dữ liệu,
+                không phải quan hệ nhân quả.
+            </small>
+
+        </div>
+        """
+    )
+
+
+# =========================================================
+# 14.10 ĐỀ XUẤT 4 - TV3 CORRELATION
+# =========================================================
+
+if not np.isnan(reco_corr):
+    
+    if abs(reco_corr) >= 0.4:
+
+        corr_level = "tương quan dương ở mức vừa"
+
+    elif abs(reco_corr) >= 0.2:
+
+        corr_level = "tương quan dương ở mức yếu đến vừa"
+
+    else:
+
+        corr_level = "tương quan dương yếu"
+
+
+    st.html(
+        f"""
+        <div class="info-card"
+             style="border-top-color:#6b7280; margin-top:16px;">
+
+            <div class="badge"
+                 style="background:#374151; color:#ffffff !important;">
+                Đề xuất 4 · TV3
+            </div>
+
+            <h4>
+                Theo dõi quá trình điều trị
+            </h4>
+
+            <p>
+                Tương quan giữa <b>thời gian nằm viện</b>
+                và <b>số loại thuốc</b> trong dữ liệu hiện tại
+                là <b>r = {reco_corr:.3f}</b>,
+                cho thấy {corr_level}.
+            </p>
+
+            <p>
+                Nên xem xét hai chỉ số cùng với các đặc điểm
+                khác của bệnh nhân thay vì sử dụng riêng lẻ
+                để đưa ra kết luận.
+            </p>
+
+        </div>
+        """
+    )
+
+
+# =========================================================
+# 14.11 KẾT LUẬN CHUNG
+# =========================================================
+
+if reco_age_group != "N/A":
+
+    conclusion_age = (
+        f"nhóm tuổi {reco_age_group}"
+    )
+
+else:
+
+    conclusion_age = "các nhóm tuổi đủ dữ liệu"
+
+
+if (
+    not np.isnan(reco_inpatient_2_rate)
+    and not np.isnan(reco_inpatient_0_rate)
+):
+
+    conclusion_inpatient = (
+        "nhóm có ≥2 lần nhập viện trước đó"
+    )
+
+else:
+
+    conclusion_inpatient = (
+        "tiền sử nhập viện"
+    )
+
+
+st.html(
+    f"""
+    <div class="info-card"
+         style="border-top-color:#111827; margin-top:20px;">
+
+        <div class="badge"
+             style="background:#111827; color:#ffffff !important;">
+            Kết luận chung
+        </div>
+
+        <h4>
+            Ưu tiên theo dõi dựa trên dữ liệu
+        </h4>
+
+        <p>
+            Với bộ lọc hiện tại, Dashboard ghi nhận
+            <b>{reco_total:,} trường hợp</b>,
+            trong đó tỷ lệ tái nhập viện <30 ngày là
+            <b>{reco_rate:.2f}%</b>.
+        </p>
+
+        <p>
+            Các kết quả TV2 và TV3 cho thấy sự khác biệt
+            về tỷ lệ tái nhập viện giữa một số nhóm,
+            đặc biệt khi xem xét {conclusion_age}
+            và {conclusion_inpatient}.
+        </p>
+
+        <p>
+            Do đó, bệnh viện có thể sử dụng các đặc điểm này
+            để hỗ trợ phân nhóm theo dõi sau xuất viện,
+            đồng thời kết hợp nhiều yếu tố thay vì dựa vào
+            một biến riêng lẻ.
+        </p>
+
+        <small>
+            Lưu ý: Dashboard mô tả các mối liên hệ trong dữ liệu
+            và không khẳng định quan hệ nhân quả.
+        </small>
+
     </div>
     """
 )
