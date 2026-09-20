@@ -1485,7 +1485,7 @@ st.html(
 with st.container():
 
     st.markdown(
-        "### Tái nhập viện theo số lần nhập viện trước"
+        "### 4.Tái nhập viện theo số lần nhập viện trước"
     )
 
     if (
@@ -2245,76 +2245,41 @@ else:
         "Chưa có file model_comparison.png"
     )
 # =========================================================
-# HÌNH 10 + 11
-# =========================================================
-
-cm1, cm2 = st.columns(2)
-
-
-with cm1:
-
-    st.markdown(
-        "### 10. Confusion Matrix – Logistic Regression"
-    )
-
-    path = (
-        FIGURES_DIR
-        / "confusion_matrix_logistic_regression.png"
-    )
-
-    if path.exists():
-
-        st.image(
-            str(path),
-            use_container_width=True
-        )
-
-        st.caption(
-            "Hình 10. Confusion Matrix – Logistic Regression"
-        )
-
-    else:
-
-        st.warning(
-            "Chưa có file confusion_matrix_logistic_regression.png"
-        )
-
-
-with cm2:
-
-    st.markdown(
-        "### 11. Confusion Matrix – Random Forest"
-    )
-
-    path = (
-        FIGURES_DIR
-        / "confusion_matrix_random_forest.png"
-    )
-
-    if path.exists():
-
-        st.image(
-            str(path),
-            use_container_width=True
-        )
-
-        st.caption(
-            "Hình 11. Confusion Matrix – Random Forest"
-        )
-
-    else:
-
-        st.warning(
-            "Chưa có file confusion_matrix_random_forest.png"
-        )
-
-
-# =========================================================
-# HÌNH 12
+# HÌNH 10 – CONFUSION MATRIX CỦA HAI MÔ HÌNH
 # =========================================================
 
 st.markdown(
-    "### 12. ROC Curve"
+    "### 10. Confusion Matrix – Logistic Regression & Random Forest"
+)
+
+path = (
+    FIGURES_DIR
+    / "confusion_matrix_models.png"
+)
+
+if path.exists():
+
+    st.image(
+        str(path),
+        use_container_width=True
+    )
+
+    st.caption(
+        "Hình 10. Confusion Matrix – Logistic Regression & Random Forest"
+    )
+
+else:
+
+    st.warning(
+        "Chưa có file confusion_matrix_models.png"
+    )
+
+# =========================================================
+# HÌNH 11
+# =========================================================
+
+st.markdown(
+    "### 11. ROC Curve"
 )
 
 path = FIGURES_DIR / "roc_curve.png"
@@ -2331,7 +2296,7 @@ if path.exists():
         )
 
         st.caption(
-            "Hình 12. ROC Curve của hai mô hình"
+            "Hình 11. ROC Curve của hai mô hình"
         )
 
 else:
@@ -2346,7 +2311,7 @@ else:
 # =========================================================
 
 st.markdown(
-    "### 13. Top 20 Feature Importance – Random Forest"
+    "### 12. Top 20 Feature Importance – Random Forest"
 )
 
 path = (
@@ -2366,7 +2331,7 @@ if path.exists():
         )
 
         st.caption(
-            "Hình 13. Top 20 Feature Importance – Random Forest"
+            "Hình 12. Top 20 Feature Importance – Random Forest"
         )
 
 else:
@@ -3460,20 +3425,41 @@ with reco5:
 
 with reco6:
 
-    # Lấy model có ROC-AUC cao nhất từ kết quả TV4
-    best_model_name = "N/A"
-    best_model_auc = np.nan
-    best_model_recall = np.nan
+   # Lấy model có ROC-AUC cao nhất từ model_results.csv
 
-    if "results" in locals() and len(results) > 0:
+    model_results = pd.read_csv(MODEL_RESULTS_PATH)
 
-        best_model_row = results.loc[
-            results["ROC-AUC"].idxmax()
+    # Đảm bảo các cột metric là dạng số
+    model_results["ROC-AUC"] = pd.to_numeric(
+        model_results["ROC-AUC"],
+        errors="coerce"
+    )
+
+    model_results["Recall"] = pd.to_numeric(
+        model_results["Recall"],
+        errors="coerce"
+    )
+
+    # Chỉ giữ những model có đủ ROC-AUC và Recall
+    valid_results = model_results.dropna(
+        subset=["ROC-AUC", "Recall"]
+    )
+
+    if not valid_results.empty:
+
+        best_model_row = valid_results.loc[
+            valid_results["ROC-AUC"].idxmax()
         ]
 
         best_model_name = best_model_row["Model"]
         best_model_auc = best_model_row["ROC-AUC"]
         best_model_recall = best_model_row["Recall"]
+
+    else:
+
+        best_model_name = "N/A"
+        best_model_auc = np.nan
+        best_model_recall = np.nan
 
     st.html(
         f"""
