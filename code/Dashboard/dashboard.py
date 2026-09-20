@@ -54,12 +54,12 @@ FEATURE_IMPORTANCE_PATH = (
 #     KHÔNG ảnh hưởng đến số liệu/tính toán)
 # =========================================================
 
-PALETTE_AGE = px.colors.qualitative.Bold          # 10 màu rực cho 10 nhóm tuổi
-PALETTE_GROUP = px.colors.qualitative.Set2         # màu cho nhóm inpatient/emergency/outpatient
-PALETTE_GENDER = ["#2563eb", "#f97316", "#9ca3af"]  # Nữ / Nam / Không rõ
+PALETTE_AGE = px.colors.qualitative.Bold
+PALETTE_GROUP = px.colors.qualitative.Set2
+PALETTE_GENDER = ["#2563eb", "#f97316", "#9ca3af"]
 
-COLOR_NONREADMIT = "#3b82f6"   # xanh dương - không tái nhập
-COLOR_READMIT = "#dc2626"      # đỏ - tái nhập (nhóm cần chú ý)
+COLOR_NONREADMIT = "#3b82f6"
+COLOR_READMIT = "#dc2626"
 
 KPI_ACCENTS = ["#2563eb", "#dc2626", "#16a34a", "#7c3aed"]
 INFO_ACCENTS = {"tv2": "#2563eb", "tv3": "#7c3aed", "tv4": "#f97316"}
@@ -82,8 +82,37 @@ st.html(
     /* =====================================================
        TOÀN TRANG
        ===================================================== */
+    .info-card p,
+    .info-card li,
+    .info-card h4 {
+        color: #111827 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+    }
 
-    .stApp {
+    .info-card li {
+        font-size: 18px;
+        line-height: 1.65;
+    }
+
+    .info-card p {
+        font-size: 18px;
+        line-height: 1.6;
+    }
+
+    .info-card h4 {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .info-card small {
+        display: block;
+        margin-top: 12px;
+        color: #6b7280 !important;
+        opacity: 1 !important;
+        font-size: 12px;
+    }
+        .stApp {
         background-color: #f5f7fb;
     }
 
@@ -208,7 +237,7 @@ st.html(
 
     .section-title {
         color: #111827 !important;
-        font-size: 25px;
+        font-size: 34px;
         font-weight: 800;
         margin-top: 18px;
         margin-bottom: 5px;
@@ -578,7 +607,7 @@ st.html(
         </h1>
 
         <p>
-            TV5 · Tổng hợp kết quả phân tích dữ liệu
+            Tổng hợp kết quả phân tích dữ liệu
         </p>
 
     </div>
@@ -1054,10 +1083,7 @@ with col2:
 # HÌNH 3 - LOLLIPOP THEO NHÓM TUỔI (đa màu theo nhóm tuổi)
 # =========================================================
 
-col3, col4 = st.columns(2)
-
-
-with col3:
+with st.container():
 
     st.markdown(
         "### 3. Tái nhập viện theo nhóm tuổi"
@@ -1121,19 +1147,21 @@ with col3:
 
             fig3 = go.Figure()
 
-            # Đường ngang tỷ lệ chung
+            # Đường tỷ lệ chung
             fig3.add_hline(
                 y=overall_rate,
                 line_dash="dash",
                 line_width=2,
                 line_color="#6b7280",
                 annotation_text=(
-                    bold(f"Tỷ lệ chung = {overall_rate:.2f}%")
+                    bold(
+                        f"Tỷ lệ chung = {overall_rate:.2f}%"
+                    )
                 ),
                 annotation_position="top right"
             )
 
-            # Lollipop (mỗi nhóm tuổi 1 màu riêng)
+            # Đường dọc của biểu đồ lollipop
             for idx, row in age_df.iterrows():
 
                 fig3.add_trace(
@@ -1156,6 +1184,7 @@ with col3:
                     )
                 )
 
+            # Điểm tròn và phần trăm
             fig3.add_trace(
                 go.Scatter(
                     x=age_df["age"],
@@ -1194,20 +1223,30 @@ with col3:
                 )
             )
 
+            # Cấu hình biểu đồ
             fig3.update_layout(
                 title=dict(
-                    text=bold("Tỷ lệ tái nhập viện theo nhóm tuổi"),
-                    font=dict(size=16, color="#111827"),
+                    text=bold(
+                        "Tỷ lệ tái nhập viện theo nhóm tuổi"
+                    ),
+                    font=dict(
+                        size=16,
+                        color="#111827"
+                    ),
                     x=0.5,
                     xanchor="center"
                 ),
+
                 height=450,
+
                 paper_bgcolor="white",
                 plot_bgcolor="white",
+
                 font=dict(
                     color="#111827",
                     size=13
                 ),
+
                 xaxis=dict(
                     title=dict(
                         text=bold("Nhóm tuổi"),
@@ -1222,9 +1261,12 @@ with col3:
                     ),
                     showgrid=False
                 ),
+
                 yaxis=dict(
                     title=dict(
-                        text=bold("Tỷ lệ tái nhập viện (%)"),
+                        text=bold(
+                            "Tỷ lệ tái nhập viện (%)"
+                        ),
                         font=dict(
                             color="#111827",
                             size=14
@@ -1238,6 +1280,7 @@ with col3:
                     gridcolor="#e5e7eb",
                     rangemode="tozero"
                 ),
+
                 margin=dict(
                     l=70,
                     r=30,
@@ -1246,6 +1289,7 @@ with col3:
                 )
             )
 
+            # Hiển thị full chiều ngang
             st.plotly_chart(
                 fig3,
                 use_container_width=True
@@ -1255,15 +1299,193 @@ with col3:
                 "Hình 3. Tỷ lệ tái nhập viện theo nhóm tuổi"
             )
 
+# =========================================================
+# 10. TV2 INSIGHT
+# =========================================================
+
+st.html(
+    """
+    <div class="section-title">
+        💡  · Nhận xét
+    </div>
+    """
+)
+
+insight_col1, insight_col2, insight_col3 = st.columns(3)
+
+
+if (
+    total_cases > 0
+    and "time_in_hospital" in filtered.columns
+):
+
+    stay_values = filtered[
+        "time_in_hospital"
+    ].dropna()
+
+    if len(stay_values) > 0:
+
+        stay_median = stay_values.median()
+
+        mode_values = stay_values.mode()
+
+        if len(mode_values) > 0:
+            stay_mode = mode_values.iloc[0]
+        else:
+            stay_mode = 0
+
+    else:
+
+        stay_median = 0
+        stay_mode = 0
+
+else:
+
+    stay_median = 0
+    stay_mode = 0
+
+
+with insight_col1:
+
+    st.html(
+        f"""
+        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
+
+            <h4>Tái nhập viện</h4>
+
+            <p>
+                Trong tổng số
+                <b>{total_cases:,}</b>
+                ca đang được phân tích,
+                có
+                <b>{readmit_cases:,}</b>
+                ca tái nhập viện trong vòng 30 ngày,
+                tương ứng với tỷ lệ
+                <b>{readmit_rate:.2f}%</b>.
+            </p>
+
+            <p>
+                Như vậy, trong mỗi 100 ca quan sát có khoảng
+                <b>{readmit_rate:.0f}</b> ca thuộc nhóm tái nhập viện
+                trong 30 ngày. Chỉ số này mô tả tỷ lệ của
+                tập dữ liệu hiện tại sau khi áp dụng bộ lọc.
+            </p>
+
+        </div>
+        """
+    )
+
+
+with insight_col2:
+
+    st.html(
+        f"""
+        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
+
+            <h4>Thời gian nằm viện</h4>
+
+            <p>
+                Thời gian nằm viện trung bình là
+                <b>{avg_stay:.2f}</b> ngày.
+                Giá trị trung vị là
+                <b>{stay_median:.0f}</b> ngày,
+                trong khi thời gian phổ biến nhất là
+                <b>{stay_mode:.0f}</b> ngày.
+            </p>
+
+            <p>
+                Việc so sánh trung bình, trung vị và mode giúp
+                quan sát đặc điểm phân bố thời gian điều trị
+                của nhóm bệnh nhân sau khi lọc dữ liệu và hỗ trợ đánh giá xu hướng điều trị chung.
+            </p>
+
+        </div>
+        """
+    )
+
+
+if (
+    "gender" in filtered.columns
+    and total_cases > 0
+):
+
+    gender_counts = (
+        filtered["gender"]
+        .value_counts()
+    )
+
+    if len(gender_counts) > 0:
+
+        largest_gender = gender_counts.index[0]
+
+        largest_gender_pct = (
+            gender_counts.iloc[0]
+            / total_cases
+            * 100
+        )
+
+    else:
+
+        largest_gender = "N/A"
+        largest_gender_pct = 0
+
+else:
+
+    largest_gender = "N/A"
+    largest_gender_pct = 0
+
+
+with insight_col3:
+
+    st.html(
+        f"""
+        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
+
+            <h4>Giới tính</h4>
+
+            <p>
+                Trong tập dữ liệu đang được phân tích,
+                nhóm giới tính có tỷ lệ cao nhất là
+                <b>{largest_gender}</b>,
+                với khoảng
+                <b>{largest_gender_pct:.2f}%</b>
+                tổng số ca.
+            </p>
+
+            <p>
+                Kết quả này mô tả cơ cấu giới tính của tập dữ liệu
+                hiện tại và thay đổi theo các điều kiện lọc
+                được lựa chọn ở thanh bên, giúp đánh giá sự khác biệt giữa các nhóm bệnh nhân.
+            </p>
+
+        </div>
+        """
+    )
+
+
+# =========================================================
+# 11. TV3 - PHÂN TÍCH THỐNG KÊ
+# =========================================================
+
+st.html(
+    """
+    <div class="section-title">
+        📈 Phân tích thống kê
+    </div>
+    """
+)
+
+
+
 
 # =========================================================
 # HÌNH 4 - NUMBER INPATIENT (đa màu theo nhóm)
 # =========================================================
 
-with col4:
+with st.container():
 
     st.markdown(
-        "### 4. Tái nhập viện theo số lần nhập viện trước"
+        "### Tái nhập viện theo số lần nhập viện trước"
     )
 
     if (
@@ -1424,221 +1646,6 @@ with col4:
             st.caption(
                 "Hình 4. Tỷ lệ tái nhập viện theo số lần nhập viện trước đó"
             )
-
-
-# =========================================================
-# 10. TV2 INSIGHT
-# =========================================================
-
-st.html(
-    """
-    <div class="section-title">
-        💡 TV2 · Insight
-    </div>
-    """
-)
-
-insight_col1, insight_col2, insight_col3 = st.columns(3)
-
-
-# ---------------------------------------------------------
-# Median + Mode
-# ---------------------------------------------------------
-
-if (
-    total_cases > 0
-    and "time_in_hospital" in filtered.columns
-):
-
-    stay_values = filtered[
-        "time_in_hospital"
-    ].dropna()
-
-    if len(stay_values) > 0:
-
-        stay_median = stay_values.median()
-
-        mode_values = stay_values.mode()
-
-        if len(mode_values) > 0:
-            stay_mode = mode_values.iloc[0]
-        else:
-            stay_mode = 0
-
-    else:
-
-        stay_median = 0
-        stay_mode = 0
-
-else:
-
-    stay_median = 0
-    stay_mode = 0
-
-
-# ---------------------------------------------------------
-# Insight 1
-# ---------------------------------------------------------
-
-with insight_col1:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
-
-            <div class="badge badge-tv2">
-                TV2 · Insight
-            </div>
-
-            <h4>Tái nhập viện</h4>
-
-            <p>
-                Trong tổng số
-                <b>{total_cases:,}</b>
-                ca đang được phân tích,
-                có
-                <b>{readmit_cases:,}</b>
-                ca tái nhập viện trong vòng 30 ngày,
-                tương ứng với tỷ lệ
-                <b>{readmit_rate:.2f}%</b>.
-            </p>
-
-            <p>
-                Như vậy, trong mỗi 100 ca quan sát có khoảng
-                <b>{readmit_rate:.0f}</b> ca thuộc nhóm tái nhập viện
-                trong 30 ngày. Chỉ số này mô tả tỷ lệ của
-                tập dữ liệu hiện tại sau khi áp dụng bộ lọc.
-            </p>
-
-        </div>
-        """
-    )
-
-
-# ---------------------------------------------------------
-# Insight 2
-# ---------------------------------------------------------
-
-with insight_col2:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
-
-            <div class="badge badge-tv2">
-                TV2 · Insight
-            </div>
-
-            <h4>Thời gian nằm viện</h4>
-
-            <p>
-                Thời gian nằm viện trung bình là
-                <b>{avg_stay:.2f}</b> ngày.
-                Giá trị trung vị là
-                <b>{stay_median:.0f}</b> ngày,
-                trong khi thời gian phổ biến nhất là
-                <b>{stay_mode:.0f}</b> ngày.
-            </p>
-
-            <p>
-                Việc so sánh trung bình, trung vị và mode giúp
-                quan sát đặc điểm phân bố thời gian điều trị
-                của nhóm bệnh nhân sau khi lọc dữ liệu và hỗ trợ đánh giá xu hướng điều trị chung.
-            </p>
-
-        </div>
-        """
-    )
-
-
-# ---------------------------------------------------------
-# Insight 3
-# ---------------------------------------------------------
-
-if (
-    "gender" in filtered.columns
-    and total_cases > 0
-):
-
-    gender_counts = (
-        filtered["gender"]
-        .value_counts()
-    )
-
-    if len(gender_counts) > 0:
-
-        largest_gender = gender_counts.index[0]
-
-        largest_gender_pct = (
-            gender_counts.iloc[0]
-            / total_cases
-            * 100
-        )
-
-    else:
-
-        largest_gender = "N/A"
-        largest_gender_pct = 0
-
-else:
-
-    largest_gender = "N/A"
-    largest_gender_pct = 0
-
-
-with insight_col3:
-
-    st.html(
-        f"""
-        <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv2']};">
-
-            <div class="badge badge-tv2">
-                TV2 · Insight
-            </div>
-
-            <h4>Giới tính</h4>
-
-            <p>
-                Trong tập dữ liệu đang được phân tích,
-                nhóm giới tính có tỷ lệ cao nhất là
-                <b>{largest_gender}</b>,
-                với khoảng
-                <b>{largest_gender_pct:.2f}%</b>
-                tổng số ca.
-            </p>
-
-            <p>
-                Kết quả này mô tả cơ cấu giới tính của tập dữ liệu
-                hiện tại và thay đổi theo các điều kiện lọc
-                được lựa chọn ở thanh bên, giúp đánh giá sự khác biệt giữa các nhóm bệnh nhân.
-            </p>
-
-        </div>
-        """
-    )
-
-
-# =========================================================
-# 11. TV3 - PHÂN TÍCH THỐNG KÊ
-# =========================================================
-
-st.html(
-    """
-    <div class="section-title">
-        📈 Phân tích thống kê
-    </div>
-    """
-)
-
-st.html(
-    """
-    <div class="section-desc">
-        Các biểu đồ TV3 được dựng lại trực tiếp từ dữ liệu sạch
-        với cùng biến phân tích. Biểu đồ number_inpatient được
-        bỏ để tránh trùng với Hình 4 của TV2.
-    </div>
-    """
-)
 
 
 # =========================================================
@@ -1862,7 +1869,7 @@ if (
         )
 
         st.caption(
-            "Hình 5. Mối quan hệ giữa time_in_hospital và num_medications"
+            "Hình 5. Mối quan hệ giữa thời gian nằm viện và số loại thuốc"
         )
 
         st.html(
@@ -1870,7 +1877,7 @@ if (
             <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv3']};">
 
                 <div class="badge badge-tv3">
-                    TV3 · Insight
+                    Nhận xét
                 </div>
 
                 <p>
@@ -1890,94 +1897,50 @@ if (
             """
         )
 
-
 # =========================================================
-# HÌNH 6 + 7 (đa màu theo nhóm)
+# HÌNH 6+7
 # =========================================================
 
 col5, col6 = st.columns(2)
 
-
-for column, variable, title, figure_number in [
-
-    (
-        col5,
-        "number_emergency",
-        "6. Tỷ lệ tái nhập viện theo số lần cấp cứu trước đó",
-        6
-    ),
-
-    (
-        col6,
-        "number_outpatient",
-        "7. Tỷ lệ tái nhập viện theo số lần khám ngoại trú trước đó",
-        7
-    )
-
+for column, variable, display_name, figure_number in [
+    (col5, "number_emergency", "số lần cấp cứu trước đó", 6),
+    (col6, "number_outpatient", "số lần khám ngoại trú trước đó", 7)
 ]:
-
     with column:
+        st.markdown(f"### {figure_number}. Tỷ lệ tái nhập viện theo {display_name}")
 
-        st.markdown(
-            f"### {title}"
-        )
-
-        if (
-            variable in filtered.columns
-            and "target_30days" in filtered.columns
-        ):
-
-            temp = filtered[
-                [
-                    variable,
-                    "target_30days"
-                ]
-            ].copy()
-
-            temp[variable] = pd.to_numeric(
-                temp[variable],
-                errors="coerce"
-            )
-
-            temp = temp.dropna(
-                subset=[variable, "target_30days"]
-            )
+        if variable in filtered.columns and "target_30days" in filtered.columns:
+            temp = filtered[[variable, "target_30days"]].copy()
+            temp[variable] = pd.to_numeric(temp[variable], errors="coerce")
+            temp = temp.dropna(subset=[variable, "target_30days"])
 
             if len(temp) > 0:
-
+                # 1. Phân nhóm rõ ràng
                 temp["group"] = temp[variable].apply(
-                    lambda x:
-                    "7+"
-                    if x >= 7
-                    else str(int(x))
+                    lambda x: "7+" if x >= 7 else str(int(x))
                 )
 
-                order = [
-                    "0",
-                    "1",
-                    "2",
-                    "3",
-                    "4",
-                    "5",
-                    "6",
-                    "7+"
-                ]
+                order = ["0", "1", "2", "3", "4", "5", "6", "7+"]
 
+                # 2. Gom nhóm
                 rate_df = (
-                    temp
-                    .groupby("group")["target_30days"]
+                    temp.groupby("group")["target_30days"]
                     .agg(["mean", "count"])
                     .reindex(order)
-                    .dropna()
                     .reset_index()
                 )
 
-                rate_df["rate"] = (
-                    rate_df["mean"] * 100
-                )
+                # 3. Thay vì dropna(), hãy điền 0 cho những nhóm không có dữ liệu (nếu muốn giữ đủ 0-7+)
+                # Hoặc chỉ dropna() nếu không có bất kỳ mẫu nào
+                rate_df["count"] = rate_df["count"].fillna(0)
+                rate_df["mean"] = rate_df["mean"].fillna(0)
+                rate_df["rate"] = rate_df["mean"] * 100
+
+                # Chuyển x thành kiểu Category theo đúng thứ tự 'order' để Plotly giữ nguyên thứ tự trục X
+                rate_df["group"] = pd.Categorical(rate_df["group"], categories=order, ordered=True)
 
                 if len(rate_df) > 0:
-
                     fig_var = px.bar(
                         rate_df,
                         x="group",
@@ -1985,33 +1948,22 @@ for column, variable, title, figure_number in [
                         color="group",
                         color_discrete_sequence=PALETTE_GROUP,
                         text=rate_df.apply(
-                            lambda row:
-                            f"<b>{row['rate']:.1f}%</b><br>"
-                            f"n={int(row['count'])}",
+                            lambda row: f"<b>{row['rate']:.1f}%</b><br>n={int(row['count'])}",
                             axis=1
                         ),
                         labels={
-                            "group": variable,
-                            "rate":
-                                "Tỷ lệ tái nhập viện "
-                                "trong 30 ngày (%)"
+                            "group": display_name,
+                            "rate": "Tỷ lệ tái nhập viện trong 30 ngày (%)"
                         },
-                        title=bold(
-                            f"Tỷ lệ tái nhập viện theo "
-                            f"{variable}"
-                        )
+                        title=bold(f"Tỷ lệ tái nhập viện theo {display_name}")
                     )
 
                     fig_var.update_traces(
                         textposition="outside",
-                        textfont=dict(
-                            color="#111827",
-                            size=11
-                        ),
+                        textfont=dict(color="#111827", size=11),
                         hovertemplate=(
-                            f"<b>{variable}: %{{x}}</b>"
-                            "<br>Tỷ lệ tái nhập viện: %{y:.2f}%"
-                            "<extra></extra>"
+                            f"<b>{display_name}: %{{x}}</b><br>"
+                            "Tỷ lệ tái nhập viện: %{y:.2f}%<extra></extra>"
                         ),
                         marker_line_width=1.2,
                         marker_line_color="#374151"
@@ -2022,9 +1974,7 @@ for column, variable, title, figure_number in [
                         line_dash="dash",
                         line_width=2,
                         line_color="#6b7280",
-                        annotation_text=(
-                            bold(f"Tỷ lệ chung = {readmit_rate:.2f}%")
-                        ),
+                        annotation_text=bold(f"Tỷ lệ chung = {readmit_rate:.2f}%"),
                         annotation_position="top right"
                     )
 
@@ -2033,69 +1983,33 @@ for column, variable, title, figure_number in [
                         paper_bgcolor="white",
                         plot_bgcolor="white",
                         showlegend=False,
-                        font=dict(
-                            color="#111827",
-                            size=13
-                        ),
+                        font=dict(color="#111827", size=13),
                         title=dict(
-                            font=dict(
-                                size=18,
-                                color="#111827"
-                            ),
+                            font=dict(size=18, color="#111827"),
                             x=0.5,
                             xanchor="center"
                         ),
                         xaxis=dict(
-                            title=dict(
-                                text=bold(variable),
-                                font=dict(
-                                    color="#111827",
-                                    size=14
-                                )
-                            ),
-                            tickfont=dict(
-                                color="#111827",
-                                size=12
-                            ),
-                            showgrid=False
+                            title=dict(text=bold(display_name), font=dict(color="#111827", size=14)),
+                            tickfont=dict(color="#111827", size=12),
+                            showgrid=False,
+                            type="category" # Ép kiểu hiển thị phân loại rõ ràng
                         ),
                         yaxis=dict(
                             title=dict(
-                                text=bold(
-                                    "Tỷ lệ tái nhập viện "
-                                    "trong 30 ngày (%)"
-                                ),
-                                font=dict(
-                                    color="#111827",
-                                    size=14
-                                )
+                                text=bold("Tỷ lệ tái nhập viện trong 30 ngày (%)"),
+                                font=dict(color="#111827", size=14)
                             ),
-                            tickfont=dict(
-                                color="#111827",
-                                size=12
-                            ),
+                            tickfont=dict(color="#111827", size=12),
                             showgrid=True,
                             gridcolor="#e5e7eb",
                             rangemode="tozero"
                         ),
-                        margin=dict(
-                            l=75,
-                            r=30,
-                            t=80,
-                            b=70
-                        )
+                        margin=dict(l=75, r=30, t=80, b=70)
                     )
 
-                    st.plotly_chart(
-                        fig_var,
-                        use_container_width=True
-                    )
-
-                    st.caption(
-                        f"Hình {figure_number}. "
-                        f"Tỷ lệ tái nhập viện theo {variable}"
-                    )
-
+                    st.plotly_chart(fig_var, use_container_width=True)
+                    st.caption(f"Hình {figure_number}. Tỷ lệ tái nhập viện theo {display_name}")
 
 # =========================================================
 # HÌNH 8 - BOXPLOT (đa màu theo nhóm tuổi)
@@ -2238,13 +2152,9 @@ if (
         )
 
         st.caption(
-            "Hình 8. Mối quan hệ giữa age và time_in_hospital"
+            "Hình 8. Mối quan hệ giữa tuổi và thời gian nằm viện"
         )
 
-
-        # -----------------------------------------------------
-        # Median theo nhóm tuổi
-        # -----------------------------------------------------
 
         median_age = (
             box_data
@@ -2266,7 +2176,7 @@ if (
                 <div class="info-card" style="border-top-color:{INFO_ACCENTS['tv3']};">
 
                     <div class="badge badge-tv3">
-                        TV3 · Insight
+                        Nhận xét
                     </div>
 
                     <p>
@@ -2293,9 +2203,20 @@ if (
 
 
 
+
+
+
 # =========================================================
-# HÌNH 9
+# PHÂN TÍCH THỐNG KÊ - HÌNH 9
 # =========================================================
+
+st.html(
+    """
+    <div class="section-title">
+        📈 Phân tích thống kê
+    </div>
+    """
+)
 
 st.markdown(
     "### 9. So sánh hiệu quả các mô hình"
@@ -2323,8 +2244,6 @@ else:
     st.warning(
         "Chưa có file model_comparison.png"
     )
-
-
 # =========================================================
 # HÌNH 10 + 11
 # =========================================================
@@ -2501,7 +2420,7 @@ st.html(
 st.html(
     """
     <div class="section-desc">
-        Các đề xuất được tổng hợp từ kết quả TV2, TV3 và các chỉ số
+        Các đề xuất được tổng hợp từ kết quả và các chỉ số
         trên Dashboard. Tất cả số liệu được tính lại theo bộ lọc hiện tại.
     </div>
     """
@@ -2813,7 +2732,17 @@ else:
 
 
 # =========================================================
-# 14.8 CÁC ĐỀ XUẤT
+# 14.7 - CÁC ĐỀ XUẤT TỔNG HỢP TV2 + TV3 + TV4
+# =========================================================
+
+st.markdown(
+    '<div class="section-title">💡 Đề xuất từ kết quả phân tích</div>',
+    unsafe_allow_html=True
+)
+
+
+# =========================================================
+# 14.7.1 ĐỀ XUẤT 1 & 2
 # =========================================================
 
 reco1, reco2 = st.columns(2)
@@ -2821,11 +2750,84 @@ reco1, reco2 = st.columns(2)
 
 # ---------------------------------------------------------
 # ĐỀ XUẤT 1 - TV2
+# THEO DÕI NHÓM TUỔI
 # ---------------------------------------------------------
 
 with reco1:
 
     if reco_age_group != "N/A":
+
+        # Xác định nội dung đề xuất theo tỷ lệ
+        if reco_age_rate >= 20:
+            age_title = "Ưu tiên theo dõi nhóm tuổi có nguy cơ cao"
+            age_action = """
+            <ul>
+                <li>
+                    <b>Ưu tiên theo dõi:</b>
+                    tập trung vào nhóm tuổi có tỷ lệ tái nhập viện cao nhất.
+                </li>
+
+                <li>
+                    <b>Theo dõi sau xuất viện:</b>
+                    chủ động liên hệ và nhắc lịch tái khám trong
+                    giai đoạn 30 ngày sau xuất viện.
+                </li>
+
+                <li>
+                    <b>Hỗ trợ người nhà:</b>
+                    cung cấp hướng dẫn chăm sóc và theo dõi
+                    phù hợp với nhóm bệnh nhân này.
+                </li>
+            </ul>
+            """
+
+        elif reco_age_rate >= 10:
+            age_title = "Tăng cường theo dõi nhóm tuổi đáng chú ý"
+            age_action = """
+            <ul>
+                <li>
+                    <b>Tăng cường theo dõi:</b>
+                    chú ý nhóm tuổi có tỷ lệ tái nhập viện cao hơn
+                    trong dữ liệu hiện tại.
+                </li>
+
+                <li>
+                    <b>Duy trì liên hệ:</b>
+                    nhắc lịch tái khám và hướng dẫn bệnh nhân
+                    theo dõi tình trạng sức khỏe sau xuất viện.
+                </li>
+
+                <li>
+                    <b>Tiếp tục quan sát:</b>
+                    theo dõi sự thay đổi tỷ lệ tái nhập viện
+                    của nhóm tuổi này trong các lần phân tích tiếp theo.
+                </li>
+            </ul>
+            """
+
+        else:
+            age_title = "Theo dõi sự khác biệt giữa các nhóm tuổi"
+            age_action = """
+            <ul>
+                <li>
+                    <b>Tiếp tục theo dõi:</b>
+                    chưa ghi nhận nhóm tuổi có tỷ lệ tái nhập viện
+                    ở mức quá cao.
+                </li>
+
+                <li>
+                    <b>So sánh giữa các nhóm:</b>
+                    tiếp tục theo dõi sự thay đổi tỷ lệ tái nhập viện
+                    theo độ tuổi.
+                </li>
+
+                <li>
+                    <b>Kết hợp yếu tố khác:</b>
+                    không nên chỉ dựa vào tuổi để đánh giá nguy cơ
+                    tái nhập viện.
+                </li>
+            </ul>
+            """
 
         st.html(
             f"""
@@ -2833,28 +2835,30 @@ with reco1:
                  style="border-top-color:{INFO_ACCENTS['tv2']};">
 
                 <div class="badge badge-tv2">
-                    Đề xuất 1 · TV2
+                    Đề xuất 1
                 </div>
 
                 <h4>
-                    Theo dõi nhóm tuổi {reco_age_group}
+                    {age_title}
                 </h4>
 
                 <p>
+                    <b>Bằng chứng:</b>
                     Trong dữ liệu đang chọn, nhóm tuổi
                     <b>{reco_age_group}</b> có tỷ lệ tái nhập viện
                     <b>{reco_age_rate:.2f}%</b>
-                    (n={reco_age_n:,}).
+                    với <b>n={reco_age_n:,}</b> trường hợp.
                 </p>
 
                 <p>
-                    Có thể tăng cường theo dõi sau xuất viện,
-                    nhắc lịch tái khám và duy trì liên hệ với
-                    nhóm này trong thời gian theo dõi 30 ngày.
+                    <b>Hành động khuyến nghị:</b>
                 </p>
 
+                {age_action}
+
                 <small>
-                    Kết quả mang tính mô tả theo dữ liệu hiện tại.
+                    Kết quả mang tính mô tả theo dữ liệu hiện tại,
+                    không khẳng định quan hệ nhân quả.
                 </small>
 
             </div>
@@ -2864,12 +2868,13 @@ with reco1:
     else:
 
         st.info(
-            "Chưa có nhóm tuổi nào đủ 30 trường hợp để phân tích."
+            "Chưa có nhóm tuổi nào đủ dữ liệu để đưa ra đề xuất."
         )
 
 
 # ---------------------------------------------------------
-# ĐỀ XUẤT 2 - TV3 INPATIENT
+# ĐỀ XUẤT 2 - TV3
+# TIỀN SỬ NHẬP VIỆN
 # ---------------------------------------------------------
 
 with reco2:
@@ -2879,9 +2884,84 @@ with reco2:
         and not np.isnan(reco_inpatient_2_rate)
     ):
 
-        diff_text = (
-            f"{reco_inpatient_difference:+.2f}"
-        )
+        diff_text = f"{reco_inpatient_difference:+.2f}"
+
+        # Xác định nội dung theo độ chênh lệch
+        if abs(reco_inpatient_difference) >= 10:
+
+            inpatient_title = "Ưu tiên phân luồng theo tiền sử nhập viện"
+
+            inpatient_action = """
+            <ul>
+                <li>
+                    <b>Ưu tiên nhóm có tiền sử cao:</b>
+                    chú ý bệnh nhân đã từng nhập viện nhiều lần.
+                </li>
+
+                <li>
+                    <b>Thiết lập theo dõi:</b>
+                    đưa nhóm này vào diện cần theo dõi sau xuất viện.
+                </li>
+
+                <li>
+                    <b>Chủ động tái khám:</b>
+                    tăng cường nhắc lịch và liên hệ trong
+                    giai đoạn đầu sau xuất viện.
+                </li>
+            </ul>
+            """
+
+        elif abs(reco_inpatient_difference) >= 5:
+
+            inpatient_title = "Tăng cường theo dõi theo tiền sử nhập viện"
+
+            inpatient_action = """
+            <ul>
+                <li>
+                    <b>Phân nhóm bệnh nhân:</b>
+                    sử dụng số lần nhập viện trước đó như
+                    một tiêu chí hỗ trợ phân loại.
+                </li>
+
+                <li>
+                    <b>Chú ý nhóm có tiền sử cao:</b>
+                    tăng cường theo dõi những bệnh nhân
+                    có nhiều lần nhập viện trước đó.
+                </li>
+
+                <li>
+                    <b>Kết hợp thông tin:</b>
+                    xem xét thêm tuổi, cấp cứu và các đặc điểm
+                    điều trị khi đánh giá nguy cơ.
+                </li>
+            </ul>
+            """
+
+        else:
+
+            inpatient_title = "Kết hợp tiền sử nhập viện với các yếu tố khác"
+
+            inpatient_action = """
+            <ul>
+                <li>
+                    <b>Không sử dụng riêng lẻ:</b>
+                    chênh lệch giữa các nhóm chưa đủ lớn
+                    để chỉ dựa vào tiền sử nhập viện.
+                </li>
+
+                <li>
+                    <b>Kết hợp nhiều yếu tố:</b>
+                    xem xét đồng thời tiền sử cấp cứu,
+                    tuổi và đặc điểm điều trị.
+                </li>
+
+                <li>
+                    <b>Tiếp tục theo dõi:</b>
+                    kiểm tra sự thay đổi của tỷ lệ tái nhập viện
+                    trong các nhóm theo thời gian.
+                </li>
+            </ul>
+            """
 
         st.html(
             f"""
@@ -2889,36 +2969,34 @@ with reco2:
                  style="border-top-color:{INFO_ACCENTS['tv3']};">
 
                 <div class="badge badge-tv3">
-                    Đề xuất 2 · TV3
+                    Đề xuất 2
                 </div>
 
                 <h4>
-                    Quan tâm tiền sử nhập viện
+                    {inpatient_title}
                 </h4>
 
                 <p>
-                    Nhóm có <b>≥2 lần nhập viện trước đó</b>
+                    <b>Bằng chứng:</b>
+                    Nhóm bệnh nhân có
+                    <b>≥2 lần nhập viện trước đó</b>
                     có tỷ lệ tái nhập viện
-                    <b>{reco_inpatient_2_rate:.2f}%</b>
-                    (n={reco_inpatient_2_n:,}).
-                </p>
-
-                <p>
-                    Nhóm 0 lần có tỷ lệ
-                    <b>{reco_inpatient_0_rate:.2f}%</b>
-                    (n={reco_inpatient_0_n:,}).
+                    <b>{reco_inpatient_2_rate:.2f}%</b>,
+                    trong khi nhóm 0 lần là
+                    <b>{reco_inpatient_0_rate:.2f}%</b>.
                     Chênh lệch là
-                    <b>{diff_text} điểm phần trăm</b>.
+                    <b>{diff_text} điểm %</b>.
                 </p>
 
                 <p>
-                    Có thể sử dụng tiền sử nhập viện như một
-                    tiêu chí hỗ trợ sàng lọc và theo dõi.
+                    <b>Hành động khuyến nghị:</b>
                 </p>
+
+                {inpatient_action}
 
                 <small>
-                    Đây là mối liên hệ thống kê, không khẳng định
-                    quan hệ nhân quả.
+                    Đây là mối liên hệ quan sát được trong dữ liệu,
+                    không khẳng định quan hệ nhân quả.
                 </small>
 
             </div>
@@ -2928,109 +3006,527 @@ with reco2:
     else:
 
         st.info(
-            "Chưa đủ dữ liệu để so sánh nhóm inpatient."
+            "Chưa đủ dữ liệu để so sánh nhóm tiền sử nhập viện."
         )
 
 
 # =========================================================
-# 14.9 ĐỀ XUẤT 3 - EMERGENCY
+# 14.7.2 ĐỀ XUẤT 3 & 4
 # =========================================================
 
-if (
-    not np.isnan(reco_emergency_0_rate)
-    and not np.isnan(reco_emergency_2_rate)
-):
+reco3, reco4 = st.columns(2)
 
-    emergency_diff_text = (
-        f"{reco_emergency_difference:+.2f}"
-    )
 
-    st.html(
-        f"""
-        <div class="info-card"
-             style="border-top-color:#374151; margin-top:16px;">
+# ---------------------------------------------------------
+# ĐỀ XUẤT 3 - TV3
+# TIỀN SỬ CẤP CỨU
+# ---------------------------------------------------------
 
-            <div class="badge"
-                 style="background:#374151; color:#ffffff !important;">
-                Đề xuất 3 · TV3
+with reco3:
+
+    if (
+        not np.isnan(reco_emergency_0_rate)
+        and not np.isnan(reco_emergency_2_rate)
+    ):
+
+        emergency_diff_text = (
+            f"{reco_emergency_difference:+.2f}"
+        )
+
+        # Xác định đề xuất theo độ chênh lệch
+        if abs(reco_emergency_difference) >= 10:
+
+            emergency_title = "Ưu tiên theo dõi bệnh nhân có tiền sử cấp cứu"
+
+            emergency_action = """
+            <ul>
+                <li>
+                    <b>Nhận diện nhóm nguy cơ:</b>
+                    chú ý bệnh nhân có từ 2 lần cấp cứu trước đó trở lên.
+                </li>
+
+                <li>
+                    <b>Tăng cường liên hệ:</b>
+                    chủ động theo dõi sau xuất viện đối với nhóm này.
+                </li>
+
+                <li>
+                    <b>Kết hợp tiền sử:</b>
+                    xem xét đồng thời số lần cấp cứu và số lần
+                    nhập viện trước đó.
+                </li>
+            </ul>
+            """
+
+        elif abs(reco_emergency_difference) >= 5:
+
+            emergency_title = "Theo dõi nhóm có tiền sử cấp cứu đáng chú ý"
+
+            emergency_action = """
+            <ul>
+                <li>
+                    <b>Chú ý tiền sử cấp cứu:</b>
+                    sử dụng số lần cấp cứu trước đó như
+                    một thông tin hỗ trợ đánh giá bệnh nhân.
+                </li>
+
+                <li>
+                    <b>Kết hợp thông tin:</b>
+                    xem xét cùng với tiền sử nhập viện
+                    và các đặc điểm điều trị.
+                </li>
+
+                <li>
+                    <b>Tiếp tục theo dõi:</b>
+                    đánh giá lại tỷ lệ tái nhập viện giữa các nhóm
+                    trong những lần phân tích tiếp theo.
+                </li>
+            </ul>
+            """
+
+        else:
+
+            emergency_title = "Kết hợp tiền sử cấp cứu với các yếu tố khác"
+
+            emergency_action = """
+            <ul>
+                <li>
+                    <b>Không đánh giá riêng lẻ:</b>
+                    chênh lệch giữa các nhóm cấp cứu chưa lớn.
+                </li>
+
+                <li>
+                    <b>Kết hợp nhiều yếu tố:</b>
+                    xem xét thêm tiền sử nhập viện,
+                    tuổi và các đặc điểm điều trị.
+                </li>
+
+                <li>
+                    <b>Tiếp tục quan sát:</b>
+                    theo dõi xu hướng tái nhập viện theo số lần cấp cứu.
+                </li>
+            </ul>
+            """
+
+        st.html(
+            f"""
+            <div class="info-card"
+                 style="border-top-color:{INFO_ACCENTS['tv3']};
+                        margin-top:16px;">
+
+                <div class="badge badge-tv3">
+                    Đề xuất 3
+                </div>
+
+                <h4>
+                    {emergency_title}
+                </h4>
+
+                <p>
+                    <b>Bằng chứng:</b>
+                    Nhóm có <b>≥2 lần cấp cứu trước đó</b>
+                    có tỷ lệ tái nhập viện
+                    <b>{reco_emergency_2_rate:.2f}%</b>,
+                    trong khi nhóm 0 lần là
+                    <b>{reco_emergency_0_rate:.2f}%</b>.
+                    Chênh lệch là
+                    <b>{emergency_diff_text} điểm %</b>.
+                </p>
+
+                <p>
+                    <b>Hành động khuyến nghị:</b>
+                </p>
+
+                {emergency_action}
+
+                <small>
+                    Kết quả phản ánh mối liên hệ trong dữ liệu,
+                    không phải quan hệ nhân quả.
+                </small>
+
             </div>
-
-            <h4>
-                Theo dõi tiền sử cấp cứu
-            </h4>
-
-            <p>
-                Nhóm có <b>≥2 lần cấp cứu trước đó</b>
-                có tỷ lệ tái nhập viện
-                <b>{reco_emergency_2_rate:.2f}%</b>
-                (n={reco_emergency_2_n:,}),
-                trong khi nhóm 0 lần là
-                <b>{reco_emergency_0_rate:.2f}%</b>
-                (n={reco_emergency_0_n:,}).
-            </p>
-
-            <p>
-                Chênh lệch giữa hai nhóm là
-                <b>{emergency_diff_text} điểm phần trăm</b>.
-                Có thể kết hợp thông tin này với tiền sử
-                nhập viện để hỗ trợ theo dõi.
-            </p>
-
-            <small>
-                Kết quả phản ánh mối liên hệ trong dữ liệu,
-                không phải quan hệ nhân quả.
-            </small>
-
-        </div>
-        """
-    )
-
-
-# =========================================================
-# 14.10 ĐỀ XUẤT 4 - TV3 CORRELATION
-# =========================================================
-
-if not np.isnan(reco_corr):
-    
-    if abs(reco_corr) >= 0.4:
-
-        corr_level = "tương quan dương ở mức vừa"
-
-    elif abs(reco_corr) >= 0.2:
-
-        corr_level = "tương quan dương ở mức yếu đến vừa"
+            """
+        )
 
     else:
 
-        corr_level = "tương quan dương yếu"
+        st.info(
+            "Chưa đủ dữ liệu để so sánh nhóm tiền sử cấp cứu."
+        )
 
+
+# ---------------------------------------------------------
+# ĐỀ XUẤT 4 - TV3
+# TƯƠNG QUAN THỜI GIAN NẰM VIỆN & SỐ LOẠI THUỐC
+# ---------------------------------------------------------
+
+with reco4:
+
+    if not np.isnan(reco_corr):
+
+        # Xác định mức tương quan
+        if abs(reco_corr) >= 0.5:
+
+            if reco_corr > 0:
+                corr_level = "tương quan dương mạnh"
+            else:
+                corr_level = "tương quan âm mạnh"
+
+        elif abs(reco_corr) >= 0.3:
+
+            if reco_corr > 0:
+                corr_level = "tương quan dương ở mức vừa"
+            else:
+                corr_level = "tương quan âm ở mức vừa"
+
+        elif abs(reco_corr) >= 0.2:
+
+            if reco_corr > 0:
+                corr_level = "tương quan dương yếu"
+            else:
+                corr_level = "tương quan âm yếu"
+
+        else:
+
+            corr_level = "mối tương quan rất yếu"
+
+        # Nội dung đề xuất thay đổi theo tương quan
+        if abs(reco_corr) >= 0.5:
+
+            corr_title = "Theo dõi đồng thời quá trình điều trị"
+
+            corr_action = """
+            <ul>
+                <li>
+                    <b>Theo dõi hai chỉ số:</b>
+                    xem xét thời gian nằm viện cùng với
+                    số loại thuốc trong quá trình điều trị.
+                </li>
+
+                <li>
+                    <b>Rà soát trường hợp đặc biệt:</b>
+                    chú ý những trường hợp có thời gian nằm viện
+                    dài hoặc sử dụng nhiều loại thuốc.
+                </li>
+
+                <li>
+                    <b>Tư vấn trước xuất viện:</b>
+                    hướng dẫn bệnh nhân và người nhà
+                    về việc sử dụng thuốc sau khi về nhà.
+                </li>
+            </ul>
+            """
+
+        elif abs(reco_corr) >= 0.3:
+
+            corr_title = "Xem xét mối liên hệ giữa thời gian điều trị và thuốc"
+
+            corr_action = """
+            <ul>
+                <li>
+                    <b>Theo dõi kết hợp:</b>
+                    xem xét thời gian nằm viện và số loại thuốc
+                    trong quá trình đánh giá điều trị.
+                </li>
+
+                <li>
+                    <b>Rà soát hồ sơ:</b>
+                    chú ý các trường hợp có thời gian điều trị
+                    hoặc số loại thuốc cao hơn thông thường.
+                </li>
+
+                <li>
+                    <b>Kết hợp yếu tố khác:</b>
+                    không sử dụng tương quan này như tiêu chí duy nhất
+                    để đánh giá bệnh nhân.
+                </li>
+            </ul>
+            """
+
+        else:
+
+            corr_title = "Không nên tập trung vào mối tương quan này"
+
+            corr_action = """
+            <ul>
+                <li>
+                    <b>Không ưu tiên riêng yếu tố này:</b>
+                    mối tương quan giữa hai biến khá yếu.
+                </li>
+
+                <li>
+                    <b>Tập trung yếu tố khác:</b>
+                    ưu tiên các biến có mối liên hệ rõ hơn
+                    với tỷ lệ tái nhập viện.
+                </li>
+
+                <li>
+                    <b>Tiếp tục theo dõi:</b>
+                    kiểm tra mối quan hệ này khi có thêm dữ liệu.
+                </li>
+            </ul>
+            """
+
+        st.html(
+            f"""
+            <div class="info-card"
+                 style="border-top-color:{INFO_ACCENTS['tv3']};
+                        margin-top:16px;">
+
+                <div class="badge badge-tv3">
+                    Đề xuất 4
+                </div>
+
+                <h4>
+                    {corr_title}
+                </h4>
+
+                <p>
+                    <b>Bằng chứng:</b>
+                    Tương quan giữa
+                    <b>thời gian nằm viện</b> và
+                    <b>số loại thuốc</b>
+                    trong dữ liệu hiện tại là
+                    <b>r = {reco_corr:.3f}</b>,
+                    cho thấy {corr_level}.
+                </p>
+
+                <p>
+                    <b>Hành động khuyến nghị:</b>
+                </p>
+
+                {corr_action}
+
+                <small>
+                    Tương quan không đồng nghĩa với quan hệ nhân quả.
+                </small>
+
+            </div>
+            """
+        )
+
+    else:
+
+        st.info(
+            "Chưa đủ dữ liệu để tính tương quan."
+        )
+
+
+# =========================================================
+# 14.7.3 ĐỀ XUẤT 5 & 6 - TV4
+# =========================================================
+
+reco5, reco6 = st.columns(2)
+
+
+# ---------------------------------------------------------
+# ĐỀ XUẤT 5 - TV4
+# TIỀN SỬ DỊCH VỤ & PHÂN LUỒNG
+# ---------------------------------------------------------
+
+with reco5:
+
+    if (
+        not np.isnan(reco_inpatient_0_rate)
+        and not np.isnan(reco_inpatient_2_rate)
+    ):
+
+        diff_text = f"{reco_inpatient_difference:+.2f}"
+
+        # Nội dung thay đổi theo mức chênh lệch
+        if abs(reco_inpatient_difference) >= 10:
+
+            service_title = "Ưu tiên phân luồng bệnh nhân có tiền sử cao"
+
+            service_action = """
+            <ul>
+                <li>
+                    <b>Thiết lập theo dõi sớm:</b>
+                    ưu tiên liên hệ trong những ngày đầu sau xuất viện
+                    đối với nhóm có tiền sử nhập viện nhiều lần.
+                </li>
+
+                <li>
+                    <b>Gắn cảnh báo:</b>
+                    có thể đánh dấu nhóm bệnh nhân cần theo dõi
+                    trên hệ thống quản lý.
+                </li>
+
+                <li>
+                    <b>Kết hợp tiền sử cấp cứu:</b>
+                    sử dụng thêm số lần cấp cứu để hỗ trợ phân luồng.
+                </li>
+            </ul>
+            """
+
+        elif abs(reco_inpatient_difference) >= 5:
+
+            service_title = "Tăng cường theo dõi sau xuất viện"
+
+            service_action = """
+            <ul>
+                <li>
+                    <b>Theo dõi nhóm có tiền sử cao:</b>
+                    ưu tiên liên hệ và nhắc lịch tái khám
+                    sau khi bệnh nhân xuất viện.
+                </li>
+
+                <li>
+                    <b>Phân loại bệnh nhân:</b>
+                    sử dụng tiền sử nhập viện như một tiêu chí
+                    hỗ trợ quản lý sau xuất viện.
+                </li>
+
+                <li>
+                    <b>Kết hợp dữ liệu:</b>
+                    xem xét thêm tiền sử cấp cứu và các đặc điểm khác.
+                </li>
+            </ul>
+            """
+
+        else:
+
+            service_title = "Kết hợp nhiều tiêu chí khi phân luồng"
+
+            service_action = """
+            <ul>
+                <li>
+                    <b>Không phân luồng chỉ dựa vào tiền sử:</b>
+                    mức chênh lệch hiện tại chưa lớn.
+                </li>
+
+                <li>
+                    <b>Kết hợp nhiều yếu tố:</b>
+                    xem xét tuổi, cấp cứu, nhập viện và đặc điểm điều trị.
+                </li>
+
+                <li>
+                    <b>Tiếp tục đánh giá:</b>
+                    cập nhật quy trình khi có thêm dữ liệu.
+                </li>
+            </ul>
+            """
+
+        st.html(
+            f"""
+            <div class="info-card"
+                 style="border-top-color:{INFO_ACCENTS['tv4']};
+                        margin-top:16px;">
+
+                <div class="badge badge-tv4">
+                    Đề xuất 5
+                </div>
+
+                <h4>
+                    {service_title}
+                </h4>
+
+                <p>
+                    <b>Bằng chứng:</b>
+                    Nhóm bệnh nhân có
+                    <b>≥2 lần nhập viện trước đó</b>
+                    đạt tỷ lệ tái nhập viện
+                    <b>{reco_inpatient_2_rate:.2f}%</b>,
+                    chênh lệch <b>{diff_text} điểm %</b>
+                    so với nhóm 0 lần.
+                </p>
+
+                <p>
+                    <b>Hành động khuyến nghị:</b>
+                </p>
+
+                {service_action}
+
+                <small>
+                    Khuyến nghị được xây dựng dựa trên các mối liên hệ
+                    quan sát được trong dữ liệu.
+                </small>
+
+            </div>
+            """
+        )
+
+    else:
+
+        st.info(
+            "Chưa đủ dữ liệu để xây dựng đề xuất TV4."
+        )
+
+
+# ---------------------------------------------------------
+# ĐỀ XUẤT 6 - TV4
+# MÔ HÌNH DỰ ĐOÁN
+# ---------------------------------------------------------
+
+with reco6:
+
+    # Lấy model có ROC-AUC cao nhất từ kết quả TV4
+    best_model_name = "N/A"
+    best_model_auc = np.nan
+    best_model_recall = np.nan
+
+    if "results" in locals() and len(results) > 0:
+
+        best_model_row = results.loc[
+            results["ROC-AUC"].idxmax()
+        ]
+
+        best_model_name = best_model_row["Model"]
+        best_model_auc = best_model_row["ROC-AUC"]
+        best_model_recall = best_model_row["Recall"]
 
     st.html(
         f"""
         <div class="info-card"
-             style="border-top-color:#6b7280; margin-top:16px;">
+             style="border-top-color:{INFO_ACCENTS['tv4']};
+                    margin-top:16px;">
 
-            <div class="badge"
-                 style="background:#374151; color:#ffffff !important;">
-                Đề xuất 4 · TV3
+            <div class="badge badge-tv4">
+                Đề xuất 6
             </div>
 
             <h4>
-                Theo dõi quá trình điều trị
+                Triển khai mô hình dự đoán hỗ trợ theo dõi
             </h4>
 
             <p>
-                Tương quan giữa <b>thời gian nằm viện</b>
-                và <b>số loại thuốc</b> trong dữ liệu hiện tại
-                là <b>r = {reco_corr:.3f}</b>,
-                cho thấy {corr_level}.
+                <b>Bằng chứng:</b>
+                Trong các mô hình được đánh giá,
+                <b>{best_model_name}</b> có ROC-AUC
+                <b>{best_model_auc:.3f}</b>
+                và Recall
+                <b>{best_model_recall:.3f}</b>.
             </p>
 
             <p>
-                Nên xem xét hai chỉ số cùng với các đặc điểm
-                khác của bệnh nhân thay vì sử dụng riêng lẻ
-                để đưa ra kết luận.
+                <b>Hành động khuyến nghị:</b>
             </p>
+
+            <ul>
+                <li>
+                    <b>Hỗ trợ nhận diện nguy cơ:</b>
+                    sử dụng mô hình để hỗ trợ xác định
+                    những bệnh nhân có nguy cơ tái nhập viện
+                    trong vòng 30 ngày.
+                </li>
+
+                <li>
+                    <b>Ưu tiên theo dõi:</b>
+                    kết hợp kết quả dự đoán với tiền sử nhập viện,
+                    cấp cứu và các thông tin điều trị.
+                </li>
+
+                <li>
+                    <b>Hỗ trợ quyết định:</b>
+                    kết quả mô hình được sử dụng như một công cụ
+                    hỗ trợ và cần kết hợp với đánh giá thực tế.
+                </li>
+            </ul>
+
+            <small>
+                Mô hình mang tính hỗ trợ dự đoán,
+                không thay thế đánh giá chuyên môn.
+            </small>
 
         </div>
         """
@@ -3090,7 +3586,7 @@ st.html(
         </p>
 
         <p>
-            Các kết quả TV2 và TV3 cho thấy sự khác biệt
+            Các kết quả cho thấy sự khác biệt
             về tỷ lệ tái nhập viện giữa một số nhóm,
             đặc biệt khi xem xét {conclusion_age}
             và {conclusion_inpatient}.
